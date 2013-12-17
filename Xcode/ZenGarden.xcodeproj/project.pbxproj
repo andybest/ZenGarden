@@ -2254,10 +2254,7 @@
 					"-stdlib=libc++",
 					"-std=c++0x",
 				);
-				OTHER_LDFLAGS = (
-					"-lprofiler",
-					"-stdlib=libc++",
-				);
+				OTHER_LDFLAGS = "-stdlib=libc++";
 				PRODUCT_NAME = ZenGarden;
 				VALID_ARCHS = "i386 x86_64";
 			};
@@ -2285,10 +2282,7 @@
 					"-stdlib=libc++",
 					"-std=c++0x",
 				);
-				OTHER_LDFLAGS = (
-					"-lprofiler",
-					"-stdlib=libc++",
-				);
+				OTHER_LDFLAGS = "-stdlib=libc++";
 				PRODUCT_NAME = ZenGarden;
 				SEPARATE_STRIP = YES;
 				STRIP_INSTALLED_PRODUCT = YES;
