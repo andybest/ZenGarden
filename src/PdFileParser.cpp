@@ -29,7 +29,30 @@
 #include "PdFileParser.h"
 #include "PdGraph.h"
 
-PdFileParser::PdFileParser(string directory, string filename) {
+PdFileParser::PdFileParser() {
+  
+}
+
+PdFileParser::~PdFileParser() {
+  // nothing to do
+}
+
+int PdFileParser::loadString(string aString) {
+  // if we're just loading a string, the default root path is "/"
+  rootPath = string("/");
+  
+  if (aString.empty()) {
+    isDone = true;
+    return kPDFileParserEmptyFile;
+  } else {
+    stringDesc = aString;
+    nextLine(); // read the first line
+    isDone = false;
+  }
+  return 0;
+}
+
+int PdFileParser::loadFile(string directory, string filename) {
   rootPath = string(directory);
   
   FILE *fp = fopen((directory+filename).c_str(), "rb"); // open the file in binary mode
@@ -37,6 +60,7 @@ PdFileParser::PdFileParser(string directory, string filename) {
   if (fp == NULL) {
     // error condition
     isDone = true;
+    return kPDFileParserFileNotFound;
   } else {
     // find the size of the file
     fseek(fp, 0, SEEK_SET);
@@ -54,23 +78,7 @@ PdFileParser::PdFileParser(string directory, string filename) {
     nextLine(); // read the first line
     isDone = false;
   }
-}
-
-PdFileParser::PdFileParser(string aString) {
-  // if we're just loading a string, the default root path is "/"
-  rootPath = string("/");
-  
-  if (aString.empty()) {
-    isDone = true;
-  } else {
-    stringDesc = aString;
-    nextLine(); // read the first line
-    isDone = false;
-  }
-}
-
-PdFileParser::~PdFileParser() {
-  // nothing to do
+  return 0;
 }
 
 string PdFileParser::nextMessage() {
@@ -190,7 +198,9 @@ PdGraph *PdFileParser::execute(PdMessage *initMsg, PdGraph *graph, PdContext *co
               }
             }
           }
-          PdFileParser *parser = new PdFileParser(directory, filename);
+          PdFileParser *parser = new PdFileParser();
+          parser->loadFile(directory, filename);
+          
           messageObject = parser->execute(initMessage, graph, context, false);
           // set graph name according to abstraction. useful for debugging.
           reinterpret_cast<PdGraph *>(messageObject)->setName(objectLabel);

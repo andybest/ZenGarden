@@ -157,15 +157,24 @@ ZGGraph *zg_context_new_empty_graph(PdContext *context) {
 }
 
 ZGGraph *zg_context_new_graph_from_file(PdContext *context, const char *directory, const char *filename) {
-  PdFileParser *parser = new PdFileParser(string(directory), string(filename));
-  PdGraph *graph = parser->execute(context);
-  graph->addDeclarePath(directory); // ensure that the root director is added to the declared path set
+  PdGraph *graph = NULL;
+  
+  PdFileParser *parser = new PdFileParser();
+  int rc = parser->loadFile(string(directory), string(filename));
+  if(rc == kPDFileParserFileNotFound)
+  {
+    printf("Could not create graph from file. File not found.\n");
+  }else{
+    graph = parser->execute(context);
+    graph->addDeclarePath(directory); // ensure that the root director is added to the declared path set
+  }
   delete parser;
   return graph;
 }
 
 ZGGraph *zg_context_new_graph_from_string(PdContext *context, const char *netlist) {
-  PdFileParser *parser = new PdFileParser(string(netlist));
+  PdFileParser *parser = new PdFileParser();
+  parser->loadString(string(netlist));
   PdGraph *graph = parser->execute(context);
   delete parser;
   return graph;
