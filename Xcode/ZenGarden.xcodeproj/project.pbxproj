@@ -858,6 +858,8 @@
 		A51913051860B9C60000329D /* ZenGarden.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 90337C5311D0D847009FCC01 /* ZenGarden.cpp */; };
 		A51913061860BAE20000329D /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9069DFD111D17BD600889A5B /* Accelerate.framework */; };
 		A51913081860BBA90000329D /* audioTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A51913071860BBA90000329D /* audioTest.cpp */; };
+		A519130A1860BD0E0000329D /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A51913091860BD0E0000329D /* CoreFoundation.framework */; };
+		A519130C1860BD150000329D /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A519130B1860BD150000329D /* AudioToolbox.framework */; };
 		E4A3DD0211D93E8D007FE6FC /* MessageSoundfiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E4A3DD0011D93E8D007FE6FC /* MessageSoundfiler.cpp */; };
 		E4A3DD0311D93E8D007FE6FC /* MessageSoundfiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E4A3DD0011D93E8D007FE6FC /* MessageSoundfiler.cpp */; };
 		E4A3DD0411D93E8D007FE6FC /* MessageSoundfiler.h in Headers */ = {isa = PBXBuildFile; fileRef = E4A3DD0111D93E8D007FE6FC /* MessageSoundfiler.h */; };
@@ -1186,6 +1188,8 @@
 		A51912711860B9980000329D /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		A51912731860B9980000329D /* Audio_Test.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = Audio_Test.1; sourceTree = "<group>"; };
 		A51913071860BBA90000329D /* audioTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = audioTest.cpp; path = ../src/audioTest.cpp; sourceTree = "<group>"; };
+		A51913091860BD0E0000329D /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
+		A519130B1860BD150000329D /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		C6859E8B029090EE04C91782 /* ZenGardenNp.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = ZenGardenNp.1; sourceTree = "<group>"; };
 		E4A3DD0011D93E8D007FE6FC /* MessageSoundfiler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MessageSoundfiler.cpp; path = ../src/MessageSoundfiler.cpp; sourceTree = SOURCE_ROOT; };
 		E4A3DD0111D93E8D007FE6FC /* MessageSoundfiler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MessageSoundfiler.h; path = ../src/MessageSoundfiler.h; sourceTree = SOURCE_ROOT; };
@@ -1220,6 +1224,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A519130C1860BD150000329D /* AudioToolbox.framework in Frameworks */,
+				A519130A1860BD0E0000329D /* CoreFoundation.framework in Frameworks */,
 				A51913061860BAE20000329D /* Accelerate.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1230,6 +1236,8 @@
 		08FB7794FE84155DC02AAC07 /* ZenGardenNp */ = {
 			isa = PBXGroup;
 			children = (
+				A519130B1860BD150000329D /* AudioToolbox.framework */,
+				A51913091860BD0E0000329D /* CoreFoundation.framework */,
 				A51912681860B9320000329D /* Test Apps */,
 				08FB7795FE84155DC02AAC07 /* Source */,
 				C6859E8C029090F304C91782 /* Documentation */,
