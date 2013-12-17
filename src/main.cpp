@@ -51,20 +51,20 @@ int main(int argc, char * const argv[]) {
   
   // create a graph from a file
   
-  PdGraph *graph = zg_context_new_graph_from_file(context, "/Users/mhroth/workspace/ZenGarden/demo/", "echolon_test0.pd");
+  /*PdGraph *graph = zg_context_new_graph_from_file(context, "/Users/mhroth/workspace/ZenGarden/demo/", "echolon_test0.pd");
   if (graph == NULL) {
     zg_context_delete(context);
     return 1;
-  }
+  }*/
   
-  /*
+  
   // create a graph manually
   PdGraph *graph = zg_context_new_empty_graph(context);
   ZGObject *objOsc = zg_graph_add_new_object(graph, "osc~ 440", 0.0f, 0.0f);
   ZGObject *objDac = zg_graph_add_new_object(graph, "dac~", 0.0f, 0.0f);
   zg_graph_add_connection(graph, objOsc, 0, objDac, 0);
   zg_graph_add_connection(graph, objOsc, 0, objDac, 1);
-  */
+  
   // attach the graph
   zg_graph_attach(graph);
   
