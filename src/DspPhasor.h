@@ -23,6 +23,12 @@
 #ifndef _DSP_PHASOR_H_
 #define _DSP_PHASOR_H_
 
+#ifdef __SSE3__
+#define ZGSSE3Phasor 1
+#else
+#define ZGSSE3Phasor 0
+#endif
+
 #include "DspObject.h"
 
 /** [phasor~], [phasor~ float] */
@@ -45,9 +51,12 @@ class DspPhasor : public DspObject {
   
     float frequency;
   
-    #if __SSE3__
+    #if ZGSSE3Phasor
     __m64 inc; // the amount by which to increment indicies every step
     __m64 indicies; // the table lookup indicies
+    #else
+    float floatIncrement;
+    float currentLevel;
     #endif
 };
 

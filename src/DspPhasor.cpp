@@ -57,11 +57,14 @@ void DspPhasor::processMessage(int inletIndex, PdMessage *message) {
     case 0: { // update the frequency
       if (message->isFloat(0)) {
         frequency = message->getFloat(0);
-        #if __SSE3__
+        
+        #if ZGSSE3Phasor
         float sampleStep = frequency * 65536.0f / graph->getSampleRate();
         short s = (short) sampleStep; // signed as step size may be negative as well!
         inc = _mm_set1_pi16(4*s);
-        #endif // __SSE3__
+        #else // __SSE3__*/
+        floatIncrement = (frequency / graph->getSampleRate());
+        #endif
       }
       break;
     }
@@ -76,7 +79,7 @@ void DspPhasor::processMessage(int inletIndex, PdMessage *message) {
 // NOTE(mhroth): it is assumed that the block size (toIndex) is a multiple of 4
 void DspPhasor::processSignal(DspObject *dspObject, int fromIndex, int n4) {
   DspPhasor *d = reinterpret_cast<DspPhasor *>(dspObject);
-  #if __SSE3__
+  #if ZGSSE3Phasor
   float *input = d->dspBufferAtInlet[0];
   float *output = d->dspBufferAtOutlet[0];
   __m64 indicies = d->indicies;
@@ -104,14 +107,15 @@ void DspPhasor::processSignal(DspObject *dspObject, int fromIndex, int n4) {
   d->indicies = indicies;
   
   #else
-  // TODO(mhroth):!!!
+  float *input = d->dspBufferAtInlet[0];
+  d->floatIncrement = (*input * (65535.0f/d->graph->getSampleRate()));
   #endif
 }
 
 // http://cache-www.intel.com/cd/00/00/34/76/347603_347603.pdf
 void DspPhasor::processScalar(DspObject *dspObject, int fromIndex, int toIndex) {
   DspPhasor *d = reinterpret_cast<DspPhasor *>(dspObject);
-  #if __SSE3__
+  #if ZGSSE3Phasor
   /*
    * Creates an array of unsigned short indicies (since the length of the cosine lookup table is
    * of length 2^16. These indicies are incremented by a step size based on the desired frequency.
@@ -170,6 +174,16 @@ void DspPhasor::processScalar(DspObject *dspObject, int fromIndex, int toIndex) 
     //      d->currentIndex = currentIndex + ((short) ((d->sampleStep - floorf(d->sampleStep)) * n));
   }
   #else
-  // TODO(mhroth):!!!
+  // Very crude implementation.
+  int n = toIndex - fromIndex;
+  float *output = d->dspBufferAtOutlet[0]+fromIndex;
+  
+  while(n) {
+    d->currentLevel += d->floatIncrement;
+    if(d->currentLevel > 1.0f) d->currentLevel -= 1.0f;
+    *output = d->currentLevel;
+    ++output;
+    --n;
+  }
   #endif
 }
