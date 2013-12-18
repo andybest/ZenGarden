@@ -41,6 +41,7 @@ class DspOsc : public DspObject {
   private:
     static void processScalar(DspObject *dspObject, int fromIndex, int toIndex);
     void processMessage(int inletIndex, PdMessage *message);
+    void updateFrequency(float frequency);
   
     float frequency; // frequency and phase are stored as integers because they are used
     float sampleStep;

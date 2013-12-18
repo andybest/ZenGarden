@@ -74,16 +74,8 @@ void DspOsc::processMessage(int inletIndex, PdMessage *message) {
   switch (inletIndex) {
     case 0: { // update the frequency
       if (message->isFloat(0)) {
-        frequency = fabsf(message->getFloat(0));
+        updateFrequency(fabsf(message->getFloat(0)));
         sampleStep = frequency * 65536.0f / graph->getSampleRate();
-        
-        #if __SSE3__
-        short step = (short) roundf(sampleStep);
-        inc = _mm_set_epi16(8*step, 8*step, 8*step, 8*step, 8*step, 8*step, 8*step, 8*step);
-        unsigned short currentIndex = _mm_extract_epi16(indicies,0);
-        indicies = _mm_set_epi16(7*step+currentIndex, 6*step+currentIndex, 5*step+currentIndex,
-            4*step+currentIndex, 3*step+currentIndex, 2*step+currentIndex, step+currentIndex, currentIndex);
-        #endif
       }
       break;
     }
@@ -95,14 +87,31 @@ void DspOsc::processMessage(int inletIndex, PdMessage *message) {
   }
 }
 
+void DspOsc::updateFrequency(float frequency) {
+  frequency = dspBufferAtInlet[0][0];
+  
+#if __SSE3__
+  sampleStep = frequency * 65536.0f / graph->getSampleRate();
+
+  short step1 = (short) roundf(sampleStep);
+  inc = _mm_set_epi16(8*step1, 8*step1, 8*step1, 8*step1, 8*step1, 8*step1, 8*step1, 8*step1);
+  unsigned short currentIndex1 = _mm_extract_epi16(indicies,0);
+  indicies = _mm_set_epi16(7*step1+currentIndex1, 6*step1+currentIndex1, 5*step1+currentIndex1,
+                              4*step1+currentIndex1, 3*step1+currentIndex1, 2*step1+currentIndex1, step1+currentIndex1, currentIndex1);
+#endif
+  
+}
+
 void DspOsc::processScalar(DspObject *dspObject, int fromIndex, int toIndex) {
   DspOsc *d = reinterpret_cast<DspOsc *>(dspObject);
+  
+  if(d->getIncomingDspConnections(0).size() > 0)
+  {
+    d->updateFrequency(d->dspBufferAtInlet[0][0]);
+  }
+  
   #if __SSE3__
-  /*
-   * Creates an array of unsigned short indicies (since the length of the cosine lookup table is
-   * of length 2^16. These indicies are incremented by a step size based on the desired frequency.
-   * As the indicies overflow during addition, they loop back around to zero.
-   */
+  
   float *output = d->dspBufferAtOutlet[0]+fromIndex;
   __m128i inc = d->inc;
   __m128i indicies = d->indicies;
