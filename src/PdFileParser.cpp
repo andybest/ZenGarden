@@ -300,7 +300,7 @@ PdGraph *PdFileParser::execute(PdMessage *initMsg, PdGraph *graph, PdContext *co
            arrayLine = (char *)malloc(arrayMessage.length() + 1);
            strcpy(arrayLine, arrayMessage.c_str());
         }
-        
+        free(arrayLine);
          // ignore the #X coords line
       } else if (!strcmp(objectType, "coords")) {
         // NOTE(mhroth): not really sure what this object type does, but it doesn't seem to have
