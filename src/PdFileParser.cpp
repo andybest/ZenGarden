@@ -29,6 +29,8 @@
 #include "PdFileParser.h"
 #include "PdGraph.h"
 
+#include <cstring>
+
 PdFileParser::PdFileParser() {
   
 }
@@ -266,7 +268,7 @@ PdGraph *PdFileParser::execute(PdMessage *initMsg, PdGraph *graph, PdContext *co
           context->printErr("declare \"%s\" flag is not supported.", initMessage->getSymbol(0));
         }
       } else if (!strcmp(objectType, "array")) {
-        /*
+        
         // creates a new table
         // objectInitString should contain both name and buffer length
         char *objectInitString = strtok(NULL, ";"); // get the object initialisation string
@@ -276,18 +278,30 @@ PdGraph *PdFileParser::execute(PdMessage *initMsg, PdGraph *graph, PdContext *co
         graph->addObject(0, 0, table);
         int bufferLength = 0;
         float *buffer = table->getBuffer(&bufferLength);
+        
+        string arrayMessage = nextMessage();
+        char *arrayLine = (char *)malloc(arrayMessage.length() + 1);
+        strcpy(arrayLine, arrayMessage.c_str());
+        
          // next many lines should be elements of that array
          // while the next line begins with #A
-         while (!strcmp(strtok(line = nextMessage(), " ;"), "#A")) {
+         while(!strcmp(strtok(arrayLine, " ;"), "#A")) {
+           printf("Line: %s\n", arrayMessage.c_str());
+           
            int index = atoi(strtok(NULL, " ;"));
            char *nextNumber = NULL;
            // ensure that file does not attempt to write more than stated numbers
            while (((nextNumber = strtok(NULL, " ;")) != NULL) && (index < bufferLength)) {
              buffer[index++] = atof(nextNumber);
            }
-         }
+           
+           arrayMessage = nextMessage();
+           free(arrayLine);
+           arrayLine = (char *)malloc(arrayMessage.length() + 1);
+           strcpy(arrayLine, arrayMessage.c_str());
+        }
+        
          // ignore the #X coords line
-         */
       } else if (!strcmp(objectType, "coords")) {
         // NOTE(mhroth): not really sure what this object type does, but it doesn't seem to have
         // any effect on the function of the patch (i.e. it seems to be purely cosmetic).
