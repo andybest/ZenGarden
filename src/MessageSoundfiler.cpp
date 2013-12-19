@@ -20,7 +20,7 @@
  *
  */
 
-//#include <sndfile.h>
+#include <sndfile.h>
 #include "MessageSoundfiler.h"
 #include "MessageTable.h"
 #include "PdGraph.h"
@@ -42,31 +42,47 @@ const char *MessageSoundfiler::getObjectLabel() {
 }
 
 void MessageSoundfiler::processMessage(int inletIndex, PdMessage *message) {
-/*
+
   if (message->isSymbol(0, "read")) {
     int currentElementIndex = 1;
     bool shouldResizeTable = false;
     
     while (currentElementIndex < message->getNumElements()) {
       if (message->isSymbol(currentElementIndex)) {
-        // only the -resize flag is supported for now
-        if (message->isSymbol(currentElementIndex++, "-resize")) {
-          shouldResizeTable = true;
+        
+        if(message->getSymbol(currentElementIndex)[0] == '-')
+        {
+          // Symbol is a flag
+          if (message->isSymbol(currentElementIndex, "-resize")) {
+            shouldResizeTable = true;
+          }else{
+            graph->printErr("[soundfiler]: unsupported flag %s", message->getSymbol(currentElementIndex));
+          }
+          currentElementIndex++;
+          
         } else {
+          if(message->getNumElements() < currentElementIndex + 2)
+          {
+            graph->printErr("[soundfiler]: not enough arguments.");
+          }
+          
+          MessageAtom *fileAtom = message->getElement(currentElementIndex++);
           // all of the flags should have been seen now and now we expect the last two parameters,
           // which are file location and destination table name
-          MessageElement *tableNameElement = message->getElement(currentElementIndex++);
-          if (messageElement != NULL && messageElement->isSymbol() &&
-              tableNameElement != NULL && tableNameElement->isSymbol()) {
-            MessageTable *table = graph->getTable(tableNameElement->getSymbol());
-            if (table != NULL) {
-              // use libsndfile to load and read the file (also converting the samples to [-1,1] float)
-              SF_INFO sfInfo;
-              char *fullPath = graph->resolveFullPath(messageElement->getSymbol());
+          MessageAtom *tableNameElement = message->getElement(currentElementIndex++);
+          if (tableNameElement != NULL) {
+            MessageTable *table = graph->getTable(tableNameElement->symbol);
+            if (table == NULL) {
+              graph->printErr("[soundfiler]: table %s does not exist.", tableNameElement->symbol);
+            }else{
+              char *fullPath = graph->resolveFullPath(fileAtom->symbol);
               if (fullPath == NULL) {
-                graph->printErr("[soundfiler]: file %s cannot be found.", messageElement->getSymbol());
+                graph->printErr("[soundfiler]: file %s cannot be found.", fileAtom->symbol);
                 return;
               }
+              
+              // use libsndfile to load and read the file (also converting the samples to [-1,1] float)
+              SF_INFO sfInfo;
               
               SNDFILE *sndFile = sf_open(fullPath, SFM_READ, &sfInfo);
               if (sndFile == NULL) {
@@ -100,10 +116,7 @@ void MessageSoundfiler::processMessage(int inletIndex, PdMessage *message) {
                 }
                 
                 // extract the second channel (if it exists and if there is a table to write it to)
-                if (sfInfo.channels > 1 &&
-                    (tableNameElement = message->getElement(currentElementIndex++)) != NULL &&
-                    tableNameElement->isSymbol() &&
-                    (table = graph->getTable(tableNameElement->getSymbol())) != NULL) {
+                if (sfInfo.channels > 1) {
                   tableLength = samplesPerChannel;
                   tableBuffer = shouldResizeTable ? table->resizeBuffer(samplesPerChannel) :
                   table->getBuffer(&tableLength);
@@ -119,7 +132,7 @@ void MessageSoundfiler::processMessage(int inletIndex, PdMessage *message) {
               free(buffer);
               
               // send message with sample length when all tables have been filled
-              PdMessage *outgoingMessage = getNextOutgoingMessage(0);
+              PdMessage *outgoingMessage = PD_MESSAGE_ON_STACK(0);
               outgoingMessage->setFloat(0, (float) samplesPerChannel);
               outgoingMessage->setTimestamp(message->getTimestamp());
               sendMessage(0, outgoingMessage);
@@ -132,5 +145,4 @@ void MessageSoundfiler::processMessage(int inletIndex, PdMessage *message) {
     // TODO(mhroth): not supported yet
     graph->printErr("The \"write\" command to soundfiler is not supported.");
   }
-*/
 }
