@@ -32,13 +32,7 @@ MessageObject *DspOsc::newObject(PdMessage *initMessage, PdGraph *graph) {
 }
 
 DspOsc::DspOsc(PdMessage *initMessage, PdGraph *graph) : DspObject(2, 2, 0, 1, graph) {
-  frequency = initMessage->isFloat(0) ? initMessage->getFloat(0) : 0.0f;
-  sampleStep = frequency * 65536.0f / graph->getSampleRate();
-  #if __SSE3__
-  short step = (short) roundf(sampleStep);
-  inc = _mm_set_epi16(8*step, 8*step, 8*step, 8*step, 8*step, 8*step, 8*step, 8*step);
-  indicies = _mm_set_epi16(7*step, 6*step, 5*step, 4*step, 3*step, 2*step, step, 0);
-  #endif
+  updateFrequency(initMessage->isFloat(0) ? initMessage->getFloat(0) : 0.0f);
   
   phase = 0.0f;
   refCount++;
@@ -75,22 +69,21 @@ void DspOsc::processMessage(int inletIndex, PdMessage *message) {
     case 0: { // update the frequency
       if (message->isFloat(0)) {
         updateFrequency(fabsf(message->getFloat(0)));
-        sampleStep = frequency * 65536.0f / graph->getSampleRate();
       }
       break;
     }
     case 1: { // update the phase
-      // TODO(mhroth)
+      
       break;
     }
     default: break;
   }
 }
 
-void DspOsc::updateFrequency(float frequency) {
-  frequency = dspBufferAtInlet[0][0];
+void DspOsc::updateFrequency(float freq) {
+  this->frequency = freq;
   
-#if __SSE3__
+#if 0 //__SSE3__
   sampleStep = frequency * 65536.0f / graph->getSampleRate();
 
   short step1 = (short) roundf(sampleStep);
@@ -98,8 +91,12 @@ void DspOsc::updateFrequency(float frequency) {
   unsigned short currentIndex1 = _mm_extract_epi16(indicies,0);
   indicies = _mm_set_epi16(7*step1+currentIndex1, 6*step1+currentIndex1, 5*step1+currentIndex1,
                               4*step1+currentIndex1, 3*step1+currentIndex1, 2*step1+currentIndex1, step1+currentIndex1, currentIndex1);
-#endif
+#else
+  // Calculate per-sample phase increment.
+  // phaseStep = frequency * (powf(2.0f, 32.0f) - 1) / graph->getSampleRate();
+  phaseStep = this->frequency * (0xFFFFFFFF / graph->getSampleRate());
   
+#endif
 }
 
 void DspOsc::processScalar(DspObject *dspObject, int fromIndex, int toIndex) {
@@ -110,7 +107,7 @@ void DspOsc::processScalar(DspObject *dspObject, int fromIndex, int toIndex) {
     d->updateFrequency(d->dspBufferAtInlet[0][0]);
   }
   
-  #if __SSE3__
+  #if 0 //__SSE3__
   
   float *output = d->dspBufferAtOutlet[0]+fromIndex;
   __m128i inc = d->inc;
@@ -180,6 +177,27 @@ void DspOsc::processScalar(DspObject *dspObject, int fromIndex, int toIndex) {
     }
   }
   #else
-  // TODO(mhroth):!!!
+  float *output = d->dspBufferAtOutlet[0]+fromIndex;
+  int n = toIndex - fromIndex;
+  
+  while(n)
+  {
+    // Fast sine from musicdsp.org
+    const float frf3 = -1.0f / 6.0f;
+    const float frf5 = 1.0f / 120.0f;
+    const float frf7 = -1.0f / 5040.0f;
+    const float frf9 = 1.0f / 362880.0f;
+    const float f0pi5 = 1.570796327f;
+    float x, x2, asin;
+    unsigned int tmp = 0x3f800000 | (d->phase >> 7);
+    if (d->phase & 0x40000000)
+      tmp ^= 0x007fffff;
+    x = (*((float*)&tmp) - 1.0f) * f0pi5;
+    x2 = x * x;
+    asin = ((((frf9 * x2 + frf7) * x2 + frf5) * x2 + frf3) * x2 + 1.0f) * x;
+    *output++ = (d->phase & 0x80000000) ? -asin : asin;
+    d->phase += d->phaseStep;
+    --n;
+  }
   #endif
 }

@@ -41,11 +41,13 @@ class DspOsc : public DspObject {
   private:
     static void processScalar(DspObject *dspObject, int fromIndex, int toIndex);
     void processMessage(int inletIndex, PdMessage *message);
-    void updateFrequency(float frequency);
+    void updateFrequency(float freq);
   
     float frequency; // frequency and phase are stored as integers because they are used
     float sampleStep;
-    int phase;     // in for-loops to traverse the lookup table
+    unsigned int phase;     // in for-loops to traverse the lookup table]
+    unsigned int phaseStep;
+  
   
     static float *cos_table; // the cosine lookup table
     static int refCount; // a reference counter for cos_table. Now we know when to free it.
