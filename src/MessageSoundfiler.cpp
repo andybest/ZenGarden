@@ -133,8 +133,7 @@ void MessageSoundfiler::processMessage(int inletIndex, PdMessage *message) {
               
               // send message with sample length when all tables have been filled
               PdMessage *outgoingMessage = PD_MESSAGE_ON_STACK(0);
-              outgoingMessage->setFloat(0, (float) samplesPerChannel);
-              outgoingMessage->setTimestamp(message->getTimestamp());
+              outgoingMessage->initWithTimestampAndFloat(message->getTimestamp(), (float)samplesPerChannel);
               sendMessage(0, outgoingMessage);
             }
           }
