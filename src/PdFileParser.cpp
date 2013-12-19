@@ -201,12 +201,20 @@ PdGraph *PdFileParser::execute(PdMessage *initMsg, PdGraph *graph, PdContext *co
             }
           }
           PdFileParser *parser = new PdFileParser();
-          parser->loadFile(directory, filename);
+          int rc = parser->loadFile(directory, filename);
           
-          messageObject = parser->execute(initMessage, graph, context, false);
+          if(rc) {
+            // If an absraction with this name was not found, create a new graph and add it in place of the object
+            messageObject = new PdGraph(initMessage, graph, context, context->getNextGraphId());
+            graph->addObject(canvasX, canvasY, messageObject);
+          }else{
+            messageObject = parser->execute(initMessage, graph, context, false);
+          }
+          
           // set graph name according to abstraction. useful for debugging.
           reinterpret_cast<PdGraph *>(messageObject)->setName(objectLabel);
           delete parser;
+          
           // because the object is a graph, and thus defined by #canvas, it has already been added
           // to the parent graph
         } else {
