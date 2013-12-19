@@ -108,7 +108,8 @@ void DspPhasor::processSignal(DspObject *dspObject, int fromIndex, int n4) {
   
   #else
   float *input = d->dspBufferAtInlet[0];
-  d->floatIncrement = (*input * (65535.0f/d->graph->getSampleRate()));
+  d->frequency = *input;
+  d->floatIncrement = (d->frequency / d->graph->getSampleRate());
   #endif
 }
 
@@ -176,6 +177,14 @@ void DspPhasor::processScalar(DspObject *dspObject, int fromIndex, int toIndex) 
   #else
   // Very crude implementation.
   int n = toIndex - fromIndex;
+  
+  if(d->getIncomingDspConnections(0).size() > 0)
+  {
+    float *input = d->dspBufferAtInlet[0];
+    d->frequency = *input;
+    d->floatIncrement = (d->frequency / d->graph->getSampleRate());
+  }
+  
   float *output = d->dspBufferAtOutlet[0]+fromIndex;
   
   while(n) {

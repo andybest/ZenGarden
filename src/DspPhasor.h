@@ -23,11 +23,11 @@
 #ifndef _DSP_PHASOR_H_
 #define _DSP_PHASOR_H_
 
-#ifdef __SSE3__
-#define ZGSSE3Phasor 1
-#else
+//#ifdef __SSE3__
+//#define ZGSSE3Phasor 1
+//#else
 #define ZGSSE3Phasor 0
-#endif
+//#endif
 
 #include "DspObject.h"
 
